@@ -5,7 +5,7 @@ from Bert_MLP import Config
 code_change_lst = []
 todo_comment_lst = []
 label_lst = []
-with open('./cc_todo_pairs', 'r') as fin:
+with open('./data/cc_todo_pairs', 'r') as fin:
     for line in fin: 
         code_change, todo_comment, label = line.strip().split('\t')
         label = int(label)

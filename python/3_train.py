@@ -43,11 +43,11 @@ def save_model_step(step, model, training_stats):
 
 
 # Load the iterator  
-with open('./train_dataloader.pkl', 'rb') as handle:
-    train_dataloader = pickle.load(handle)
+with open('./data/train_dataloader.pkl', 'rb') as handler:
+    train_dataloader = pickle.load(handler)
 
-with open('./validation_dataloader.pkl', 'rb') as handle:
-    validation_dataloader = pickle.load(handle)
+with open('./data/test_dataloader.pkl', 'rb') as handler:
+    test_dataloader = pickle.load(handler)
 
 print("dataloader loaded!")
 
@@ -114,20 +114,17 @@ for epoch_i in range(0, epochs):
             # break
 
         # Save by step size    
-        if step % 1500 == 0 and not step == 0:
+        if step % 2000 == 0 and not step == 0:
             # Record all statistics from this epoch.
-            training_stats.append(\
-            {'epoch': epoch_i + 1, \
-             'step': step, \
-             # 'Training Loss': avg_train_loss, \
-             # 'Training Time': training_time, \
-            })
-            step_marker = str(epoch_i +1 ) + '-' + str(step)
-            save_model_step(step_marker, model, training_stats)
-            # break
-        
-        # if step % 10000 == 0 and not step == 0:
-        #     break
+            # training_stats.append(\
+            # {'epoch': epoch_i + 1, \
+            #  'step': step, \
+            #  'Training Loss': avg_train_loss, \
+            #  'Training Time': training_time, \
+            # })
+            # step_marker = str(epoch_i +1 ) + '-' + str(step)
+            # save_model_step(step_marker, model, training_stats)
+            break
 
         # Unpack this training batch from our dataloader.  
         # 
@@ -138,15 +135,23 @@ for epoch_i in range(0, epochs):
         #   [1]: qc0 attention masks
         #   [2]: qc0 token type ids
         #   [3]: labels 
-        b_input_ids   = batch[0].to(config.device)
-        b_input_mask  = batch[1].to(config.device)
-        b_input_types = batch[2].to(config.device)
-        b_labels = batch[3].to(config.device)
+        cc_input_ids   = batch[0].to(config.device)
+        cc_input_mask  = batch[1].to(config.device)
+        cc_input_types = batch[2].to(config.device)
+
+        td_input_ids   = batch[3].to(config.device)
+        td_input_mask  = batch[4].to(config.device)
+        td_input_types = batch[5].to(config.device)
+
+        b_labels = batch[6].to(config.device)
         
         model.zero_grad()
+        # code_change input
+        cc_input = (cc_input_ids, cc_input_mask, cc_input_types)
+        # todo_comment input 
+        td_input = (td_input_ids, td_input_mask, td_input_types)
 
-        b_input = (b_input_ids, b_input_mask, b_input_types)
-        b_outputs = model(b_input)
+        b_outputs = model(cc_input, td_input)
         # print('batch outputs:', type(b_outputs), b_outputs.shape)
         # exit()
 
@@ -169,7 +174,7 @@ for epoch_i in range(0, epochs):
         # Update the learning rate.
         scheduler.step()
         # break
-    # exit()
+
     # Calculate the average loss over all of the batches.
     avg_train_loss = total_train_loss / len(train_dataloader)
 
@@ -188,7 +193,7 @@ for epoch_i in range(0, epochs):
     # our validation set. 
     
     print("")
-    print("Running Validation...")
+    print("Running Testing...")
     
     t0 = time.time()
     # Put the model in evaluation mode--the dropout layers behave differently
@@ -201,7 +206,7 @@ for epoch_i in range(0, epochs):
     nb_eval_steps = 0
 
     # Evaluate data for one epoch
-    for batch in validation_dataloader:
+    for batch in test_dataloader:
         # Unpack this training batch from our dataloader.  
         # 
         # As we unpack the batch, we'll also copy each tensor to the GPU using the 'to' method
@@ -210,12 +215,15 @@ for epoch_i in range(0, epochs):
         #   [0]: input ids 
         #   [1]: attention masks
         #   [2]: labels 
-        b_input_ids   = batch[0].to(config.device)
-        b_input_mask  = batch[1].to(config.device)
-        b_input_types = batch[2].to(config.device)
-        b_labels = batch[3].to(config.device)
+        cc_input_ids   = batch[0].to(config.device)
+        cc_input_mask  = batch[1].to(config.device)
+        cc_input_types = batch[2].to(config.device)
 
+        td_input_ids   = batch[3].to(config.device)
+        td_input_mask  = batch[4].to(config.device)
+        td_input_types = batch[5].to(config.device)
 
+        b_labels = batch[6].to(config.device)
         # Tell pytorch not to bother with constructing the compute graph during
         # the forward pass, since this is only needed for backprop (training).
         with torch.no_grad():
@@ -223,11 +231,15 @@ for epoch_i in range(0, epochs):
             # token_type_ids is the same as the "segment ids", which
             # differentiates sentence 1 and 2 in 2-sentence tasks.
             # values prior to applying an activation function like the softmax.
-            b_input = (b_input_ids, b_input_mask, b_input_types)
-            b_outputs = model(b_input)
+            # code_change input
+            cc_input = (cc_input_ids, cc_input_mask, cc_input_types)
+            # todo_comment input 
+            td_input = (td_input_ids, td_input_mask, td_input_types)
+
+            b_outputs = model(cc_input, td_input)
+            # print('batch outputs:', type(b_outputs), b_outputs.shape)
 
         loss = F.cross_entropy(b_outputs, b_labels)
-             
         # Accumulate the validation loss.
         total_eval_loss += loss.item()
 
@@ -235,26 +247,22 @@ for epoch_i in range(0, epochs):
         preds = torch.max(b_outputs.data, 1)[1].cpu().numpy()
         # print("preds:", type(preds), preds.shape)
         labels = b_labels.to('cpu').numpy()
-        # print("labels:", type(labels), labels.shape)
-        # print(preds)
-        # print(labels)
-
         # Calculate the accuracy for this batch of test sentences, and
         total_eval_accuracy += flat_accuracy(preds, labels)
         # break
 
     # Report the final accuracy for this validation run.
-    avg_val_accuracy = total_eval_accuracy / len(validation_dataloader)
+    avg_val_accuracy = total_eval_accuracy / len(test_dataloader)
     print("  Accuracy: {0:.2f}".format(avg_val_accuracy))
     
     # Calculate the average loss over all of the batches.
-    avg_val_loss = total_eval_loss / len(validation_dataloader)
+    avg_val_loss = total_eval_loss / len(test_dataloader)
     
     # Measure how long the validation run took.
-    validation_time = format_time(time.time() - t0)
+    test_time = format_time(time.time() - t0)
     
     print("  Validation Loss: {0:.2f}".format(avg_val_loss))
-    print("  Validation took: {:}".format(validation_time))
+    print("  Validation took: {:}".format(test_time))
     
     # Record all statistics from this epoch.
     training_stats.append(\
@@ -263,14 +271,12 @@ for epoch_i in range(0, epochs):
          'Valid. Loss': avg_val_loss, \
          'Valid. Accur.': avg_val_accuracy, \
          'Training Time': training_time, \
-         'Validation Time': validation_time
+         'Validation Time': test_time
         })
     
     save_model(epoch_i + 1, model, training_stats)
-    # exit()
-    # break
+    break
 
 print("")
 print("Training complete!")
 print("Total training took {:} (h:mm:ss)".format(format_time(time.time()-total_t0)))
-

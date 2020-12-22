@@ -114,7 +114,7 @@ for epoch_i in range(0, epochs):
             # break
 
         # Save by step size    
-        if step % 2000 == 0 and not step == 0:
+        # if step % 200 == 0 and not step == 0:
             # Record all statistics from this epoch.
             # training_stats.append(\
             # {'epoch': epoch_i + 1, \
@@ -124,7 +124,7 @@ for epoch_i in range(0, epochs):
             # })
             # step_marker = str(epoch_i +1 ) + '-' + str(step)
             # save_model_step(step_marker, model, training_stats)
-            break
+            # break
 
         # Unpack this training batch from our dataloader.  
         # 
@@ -275,7 +275,7 @@ for epoch_i in range(0, epochs):
         })
     
     save_model(epoch_i + 1, model, training_stats)
-    break
+    # break
 
 print("")
 print("Training complete!")

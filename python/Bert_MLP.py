@@ -10,7 +10,7 @@ class Config(object):
         self.hidden_size = 768
         self.tokenizer = BertTokenizer.from_pretrained(self.bert_path)
         self.batch_size = 16
-        self.num_epochs = 1 
+        self.num_epochs = 5 
 
 
 class Model(nn.Module):
@@ -30,14 +30,25 @@ class Model(nn.Module):
         cc_input_ids, cc_input_mask, cc_input_types = cc_input[0], cc_input[1], cc_input[2] 
         td_input_ids, td_input_mask, td_input_types = td_input[0], td_input[1], td_input[2] 
 
-        _, cc_pooled = self.bert(input_ids = cc_input_ids, \
-                                       attention_mask = cc_input_mask, \
-                                       token_type_ids = cc_input_types) 
+        # _, cc_pooled = self.bert(input_ids = cc_input_ids, \
+        #                                attention_mask = cc_input_mask, \
+        #                                token_type_ids = cc_input_types) 
 
-        _, td_pooled = self.bert(input_ids = td_input_ids, \
-                                       attention_mask = td_input_mask, \
-                                       token_type_ids = td_input_types) 
+        # _, td_pooled = self.bert(input_ids = td_input_ids, \
+        #                                attention_mask = td_input_mask, \
+        #                                token_type_ids = td_input_types) 
 
+        cc_outputs = self.bert(input_ids = cc_input_ids, \
+                               attention_mask = cc_input_mask, \
+                               token_type_ids = cc_input_types) 
+
+
+        td_outputs = self.bert(input_ids = td_input_ids, \
+                               attention_mask = td_input_mask, \
+                               token_type_ids = td_input_types) 
+        
+        cc_pooled = cc_outputs.pooler_output 
+        td_pooled = td_outputs.pooler_output
         features = torch.cat((cc_pooled, td_pooled), dim=1)
         features = self.fc0(features)
         features = self.fc1(features)

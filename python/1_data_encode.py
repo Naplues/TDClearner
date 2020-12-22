@@ -51,10 +51,11 @@ class Data_Encode(object):
         ## Tokenize & Input Formatting
         ## Import model/tokenizer 
         ## Load the BERT model
-        bert_model = BertModel.from_pretrained('./Model')
+        bert_model = BertModel.from_pretrained('./Model/')
         bert_model.cuda()
         # print("Loading BERT Tokenizer...")
-        tokenizer = AutoTokenizer.from_pretrained('./Model')
+        # tokenizer = AutoTokenizer.from_pretrained('./Model/')
+        tokenizer = BertTokenizer.from_pretrained('./Model/')
         return bert_model, tokenizer
         pass
     

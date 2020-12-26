@@ -1,7 +1,7 @@
 from utils import *
 from Bert_MLP import Config
 
-class Data_Encode(object):
+class Data_Split(object):
 
     def __init__(self):
 
@@ -16,18 +16,18 @@ class Data_Encode(object):
         assert len(self.todo_comment_lst) == len(self.commit_msg_lst)
         print(type(self.code_change_lst), len(self.code_change_lst))
         print("Dataset Loaded!")
-
+        
+        '''
         print("Loading BERT Model...")
         self.bert_model, \
         self.tokenizer = self.load_BERT()
         print("BERT Loaded!")
 
-
         print("Bert Encoding...")
         self.encoded_code_change = self.bert_encode(self.code_change_lst)
         self.encoded_todo_comment = self.bert_encode(self.todo_comment_lst)
         self.encoded_commit_msg = self.bert_encode(self.commit_msg_lst)
-
+        '''
         pass
 
     def load_data_lst(self):
@@ -44,6 +44,32 @@ class Data_Encode(object):
                 commit_msg_lst.append( commit_msg )
                 label_lst.append( label )
         return code_change_lst, todo_comment_lst, commit_msg_lst, label_lst
+    
+    def train_test_split(self):
+        '''
+        '''
+        data = []
+        with open('./data/cc_todo_pairs', 'r') as fin:
+            for line in fin:
+                data.append( line.strip() )
+
+        data_train, data_test = train_test_split(\
+            data, \
+            random_state = 2018, \
+            test_size =0.1
+        )
+
+        with open('./data/train_data/cc_todo_pairs.train', 'w') as fout: 
+            for line in data_train: 
+                fout.write(line)
+                fout.write('\n')
+
+        with open('./data/test_data/cc_todo_pairs.test', 'w') as fout: 
+            for line in data_test: 
+                fout.write(line)
+                fout.write('\n')
+
+        pass
 
     def load_BERT(self):
         '''
@@ -82,6 +108,7 @@ class Data_Encode(object):
        
         with open('./data/labels.pkl', 'wb') as handler:
             pickle.dump(labels, handler)
+
         # with open('./data/encoded_code_change.pkl', 'wb') as handler:
         #     pickle.dump(self.encoded_code_change, handler)
 
@@ -92,11 +119,11 @@ class Data_Encode(object):
         #     pickle.dump(self.encoded_commit_msg, handler)
 
 
-
 def main():
     
-    dp = Data_Encode()
-    dp.save()
+    ds = Data_Split()
+    ds.train_test_split()
+    # dp.save()
     pass
 
 if __name__ == '__main__':

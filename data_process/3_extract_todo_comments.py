@@ -3,11 +3,11 @@ import pickle
 class structure_data(object):   
     
     def __init__(self):
-        self.del_todo_dict = self.del_todo_structure()
-        print(type(self.del_todo_dict), len(self.del_todo_dict))
+        self.del_todo_lst = self.del_todo_structure()
+        print(type(self.del_todo_lst), len(self.del_todo_lst))
 
-        self.undel_todo_dict = self.undel_todo_structure()
-        print(type(self.undel_todo_dict), len(self.undel_todo_dict))
+        self.undel_todo_lst = self.undel_todo_structure()
+        print(type(self.undel_todo_lst), len(self.undel_todo_lst))
         # pass
 
     def del_todo_structure(self):
@@ -15,6 +15,7 @@ class structure_data(object):
         return del_todo_dict
         '''
         del_todo_dict = {} 
+        del_todo_lst = []
         with open('./todo_deleted.out', 'r') as fin:
             for line in fin:
                 repo_file, current_commit, parent_commit, commit_msg, diff = line.strip().split('\t') 
@@ -36,7 +37,14 @@ class structure_data(object):
                         todo_comments.append(e)
                     else:    
                         code_changes.append(e)
-
+                
+                del_todo_lst.append( (repo_file, \
+                                      current_commit, \
+                                      parent_commit, \
+                                      commit_msg, \
+                                      code_changes, \
+                                      todo_comments) )
+                '''
                 key = current_commit
                 value = {}
                 value['repo_file'] = repo_file
@@ -48,12 +56,13 @@ class structure_data(object):
                 value['todo_comments'] = todo_comments
                 # value['all_comments'] = all_comments
                 del_todo_dict[key] = value
-
-        return del_todo_dict
+                '''
+        return del_todo_lst
+        # return del_todo_dict
     
     def undel_todo_structure(self):
         undel_todo_dict = {}
-        
+        undel_todo_lst = []        
         with open('./todo_undeleted.out', 'r') as fin:
             for line in fin:
                 repo_file, current_commit, parent_commit, commit_msg, diff = line.strip().split('\t') 
@@ -74,7 +83,7 @@ class structure_data(object):
                         todo_comments.append(e)
                     else:    
                         code_changes.append(e)
-
+                '''
                 key = current_commit
                 value = {}
                 value['repo_file'] = repo_file
@@ -85,22 +94,30 @@ class structure_data(object):
                 value['code_changes'] = code_changes
                 value['todo_comments'] = todo_comments
                 # value['all_comments'] = all_comments
-                undel_todo_dict[key] = value
+                '''
+                undel_todo_lst.append( (repo_file, \
+                                      current_commit, \
+                                      parent_commit, \
+                                      commit_msg, \
+                                      code_changes, \
+                                      todo_comments) )
+               
+                # undel_todo_dict[key] = value
                 # print(undel_todo_dict)
                 # break
 
-        return undel_todo_dict
+        return undel_todo_lst
 
     def save(self):
         '''
         '''
         # save del_todo_dict 
-        with open('./del_todo_dict.pkl', 'wb') as handler:
-            pickle.dump(self.del_todo_dict, handler)
+        with open('./del_todo.pkl', 'wb') as handler:
+            pickle.dump(self.del_todo_lst, handler)
 
         # save undel_todo_dict
-        with open('./undel_todo_dict.pkl', 'wb') as handler:
-            pickle.dump(self.undel_todo_dict, handler)
+        with open('./undel_todo.pkl', 'wb') as handler:
+            pickle.dump(self.undel_todo_lst, handler)
 
 def main():  
 

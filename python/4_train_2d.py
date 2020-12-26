@@ -43,10 +43,10 @@ def save_model_step(step, model, training_stats):
 
 
 # Load the iterator  
-with open('./data/train_dataloader.pkl', 'rb') as handler:
+with open('./data/train_data/train_dataloader.pkl', 'rb') as handler:
     train_dataloader = pickle.load(handler)
 
-with open('./data/test_dataloader.pkl', 'rb') as handler:
+with open('./data/test_data/test_dataloader.pkl', 'rb') as handler:
     test_dataloader = pickle.load(handler)
 
 print("dataloader loaded!")

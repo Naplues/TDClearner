@@ -18,10 +18,18 @@ class Data_Tokenize(object):
         self.train_label_lst = self.load_data_lst('./data/train_data/cc_todo_pairs.train')
 
         print("Bert Train Data Encoding ...")
-        self.train_encoded_code_change = self.bert_encode(self.train_code_change_lst)
-        self.train_encoded_todo_comment = self.bert_encode(self.train_todo_comment_lst)
-        self.train_encoded_commit_msg = self.bert_encode(self.train_commit_msg_lst)
+        # Pointwise encoding 
+        # self.train_encoded_code_change = self.bert_encode(self.train_code_change_lst)
+        # self.train_encoded_todo_comment = self.bert_encode(self.train_todo_comment_lst)
+        # self.train_encoded_commit_msg = self.bert_encode(self.train_commit_msg_lst)
 
+        # Pairwise encoding 
+        self.train_encoded_code_change = self.bert_encode_pair(self.train_code_change_lst, \
+                                                                self.train_todo_comment_lst)
+        self.train_encoded_todo_comment = self.bert_encode_pair(self.train_todo_comment_lst, \
+                                                                self.train_commit_msg_lst) 
+        self.train_encoded_commit_msg = self.bert_encode_pair(self.train_commit_msg_lst, \
+                                                                self.train_code_change_lst) 
 
         print('Loading Test Dataset...')
         self.test_code_change_lst, \
@@ -30,9 +38,18 @@ class Data_Tokenize(object):
         self.test_label_lst = self.load_data_lst('./data/test_data/cc_todo_pairs.test')
     
         print("Bert Test Data Encoding ...")
-        self.test_encoded_code_change = self.bert_encode(self.test_code_change_lst)
-        self.test_encoded_todo_comment = self.bert_encode(self.test_todo_comment_lst)
-        self.test_encoded_commit_msg = self.bert_encode(self.test_commit_msg_lst)
+        # Pointwise Encoding  
+        # self.test_encoded_code_change = self.bert_encode(self.test_code_change_lst)
+        # self.test_encoded_todo_comment = self.bert_encode(self.test_todo_comment_lst)
+        # self.test_encoded_commit_msg = self.bert_encode(self.test_commit_msg_lst)
+        
+        # Pairwise Encodding  
+        self.test_encoded_code_change = self.bert_encode_pair(self.test_code_change_lst, \
+                                                                self.test_todo_comment_lst)
+        self.test_encoded_todo_comment = self.bert_encode_pair(self.test_todo_comment_lst, \
+                                                                self.test_commit_msg_lst) 
+        self.test_encoded_commit_msg = self.bert_encode_pair(self.test_commit_msg_lst, \
+                                                                self.test_code_change_lst) 
 
 
     def load_data_lst(self, data_path): 
@@ -67,7 +84,13 @@ class Data_Tokenize(object):
         # bert encoding 
         encoded_input = self.tokenizer(input_lst, padding=True, truncation=True, max_length=128, return_tensors='pt')
         return encoded_input
- 
+    
+    def bert_encode_pair(self, input_lst1, input_lst2):
+        encoded_input_pair = self.tokenizer(input_lst1, input_lst2, \
+                                        padding=True, truncation=True, \
+                                        max_length=128, return_tensors='pt')
+        return encoded_input_pair
+
     def save(self):
         '''
         save encoded dataset

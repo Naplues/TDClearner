@@ -108,17 +108,7 @@ class Data_Split(object):
        
         with open('./data/labels.pkl', 'wb') as handler:
             pickle.dump(labels, handler)
-
-        # with open('./data/encoded_code_change.pkl', 'wb') as handler:
-        #     pickle.dump(self.encoded_code_change, handler)
-
-        # with open('./data/encoded_todo_comment.pkl', 'wb') as handler:
-        #     pickle.dump(self.encoded_todo_comment, handler)
-        
-        # with open('./data/encoded_commit_msg.pkl', 'wb') as handler:
-        #     pickle.dump(self.encoded_commit_msg, handler)
-
-
+       
 def main():
     
     ds = Data_Split()

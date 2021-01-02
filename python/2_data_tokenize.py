@@ -5,7 +5,6 @@ from Bert_MLP import Config
 class Data_Tokenize(object):
     
     def __init__(self):
-
         print("Loading BERT Model...")
         self.bert_model, \
         self.tokenizer = self.load_BERT()
@@ -59,7 +58,12 @@ class Data_Tokenize(object):
         label_lst = []
         with open(data_path, 'r') as fin:
             for line in fin:
-                code_change, todo_comment, commit_msg, label = line.strip().split('\t')
+                line_split = line.strip().split('\t')
+                # code_change, todo_comment, commit_msg, label = line.strip().split('\t')
+                code_change = line_split[0]
+                todo_comment = line_split[1]
+                commit_msg = line_split[2]
+                label = line_split[3] 
                 label = int(label)
                 code_change_lst.append( code_change )
                 todo_comment_lst.append( todo_comment )

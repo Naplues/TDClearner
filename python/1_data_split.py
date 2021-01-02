@@ -9,7 +9,8 @@ class Data_Split(object):
         self.code_change_lst, \
         self.todo_comment_lst, \
         self.commit_msg_lst, \
-        self.label_lst = self.load_data_lst()
+        self.label_lst, \
+        self.info_lst = self.load_data_lst()
 
         assert len(self.todo_comment_lst) == len(self.code_change_lst)
         assert len(self.todo_comment_lst) == len(self.label_lst)
@@ -35,15 +36,23 @@ class Data_Split(object):
         todo_comment_lst = []
         commit_msg_lst = []
         label_lst = []
+        info_lst = []
         with open('./data/cc_todo_pairs', 'r') as fin:
             for line in fin:
-                code_change, todo_comment, commit_msg, label = line.strip().split('\t')
+                line_split = line.strip().split('\t')
+                code_change = line_split[0]
+                todo_comment = line_split[1]
+                commit_msg = line_split[2]
+                label = line_split[3] 
+                info = line_split[4:]
+                # code_change, todo_comment, commit_msg, label, info = line.strip().split('\t')
                 label = int(label)
                 code_change_lst.append( code_change )
                 todo_comment_lst.append( todo_comment )
                 commit_msg_lst.append( commit_msg )
                 label_lst.append( label )
-        return code_change_lst, todo_comment_lst, commit_msg_lst, label_lst
+                info_lst.append( info )
+        return code_change_lst, todo_comment_lst, commit_msg_lst, label_lst, info_lst
     
     def train_test_split(self):
         '''

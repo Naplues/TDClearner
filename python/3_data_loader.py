@@ -1,5 +1,6 @@
 from utils import *
 from Bert_MLP import Config
+import numpy as np
 
 class Data_Loader(object):
     
@@ -8,6 +9,7 @@ class Data_Loader(object):
         self.batch_size = self.config.batch_size 
         print("batch_size:", self.batch_size)
         
+        # Load Encoded Train Data 
         self.train_encoded_data = self.load_encoded_data('./data/train_data/train_encoded_data.pkl')
         self.train_encoded_code_change, \
         self.train_encoded_todo_comment, \
@@ -17,7 +19,11 @@ class Data_Loader(object):
         self.train_cc = self.make_train_data(self.train_encoded_code_change)      
         self.train_todo = self.make_train_data(self.train_encoded_todo_comment)      
         self.train_msg = self.make_train_data(self.train_encoded_commit_msg)      
-        
+
+        ############################
+        # Load Raw Test Data 
+        ############################
+
         # Do the same thing for the Test Set  
         self.test_encoded_data = self.load_encoded_data('./data/test_data/test_encoded_data.pkl')
         self.test_encoded_code_change, \
@@ -31,7 +37,25 @@ class Data_Loader(object):
         
         # make dataloader 
         self.train_dataloader, self.test_dataloader = self.make_dataloader()
- 
+    
+    def load_data_lst(self, data_path):
+        '''
+        '''
+        code_change_lst = []
+        todo_comment_lst = []
+        commit_msg_lst = []
+        label_lst = []
+        with open(data_path, 'r') as fin:
+            for line in fin:
+                code_change, todo_comment, commit_msg, label = line.strip().split('\t')
+                label = int(label)
+                code_change_lst.append( code_change )
+                todo_comment_lst.append( todo_comment )
+                commit_msg_lst.append( commit_msg )
+                label_lst.append( label )
+        return code_change_lst, todo_comment_lst, commit_msg_lst, label_lst
+
+
     def load_encoded_data(self, data_path):
         with open(data_path, 'rb') as handler:
             encoded_data= pickle.load(handler)
@@ -73,17 +97,21 @@ class Data_Loader(object):
         train_data = TensorDataset(self.train_cc[0], self.train_cc[1], self.train_cc[2],\
                                     self.train_todo[0], self.train_todo[1], self.train_todo[2], \
                                     self.train_msg[0], self.train_msg[1], self.train_msg[2], \
-                                    self.train_cc[3])
-        train_sampler = RandomSampler(train_data)
-        train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=self.batch_size)
+                                    self.train_cc[3]
+                                    )
+        # train_sampler = RandomSampler(train_data)
+        # train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=self.batch_size)
+        train_dataloader = DataLoader(train_data, batch_size=self.batch_size)
 
         # make the test_dataloader 
         test_data = TensorDataset(self.test_cc[0], self.test_cc[1], self.test_cc[2],\
                                     self.test_todo[0], self.test_todo[1], self.test_todo[2], \
                                     self.test_msg[0], self.test_msg[1], self.test_msg[2], \
-                                    self.test_cc[3])
-        test_sampler = RandomSampler(test_data)
-        test_dataloader = DataLoader(test_data, sampler=test_sampler, batch_size=self.batch_size)
+                                    self.test_cc[3] 
+                                    )
+        # test_sampler = RandomSampler(test_data)
+        # test_dataloader = DataLoader(test_data, sampler=test_sampler, batch_size=self.batch_size)
+        test_dataloader = DataLoader(test_data, batch_size=self.batch_size)
         return train_dataloader, test_dataloader
         pass
 

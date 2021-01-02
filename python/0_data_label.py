@@ -18,12 +18,17 @@ class Data_Label(object):
         positive_samples = [] 
         with open('./data/positive_samples/code_change_pro.out', 'r') as cc, \
             open('./data/positive_samples/todo_comments_pro.out', 'r') as todo, \
-            open('./data/positive_samples/commit_msg_pro.out', 'r') as msg:
-            for cc_line, todo_line, msg_line in zip(cc, todo, msg): 
+            open('./data/positive_samples/commit_msg_pro.out', 'r') as msg, \
+            open('data/positive_samples/commit_info_pro.out', 'r') as info:
+            for cc_line, todo_line, msg_line, info_line in zip(cc, todo, msg, info): 
                 cc_line_clear = cc_line.strip()
                 todo_line_clear = todo_line.strip().strip('-')
                 msg_line_clear = msg_line.strip()  
-                positive_samples.append( (cc_line_clear, todo_line_clear, msg_line_clear) )
+                info_line_clear = info_line.strip() 
+                positive_samples.append( (cc_line_clear, \
+                                          todo_line_clear, \
+                                          msg_line_clear, \
+                                          info_line_clear) )
 
         return positive_samples
 
@@ -33,29 +38,37 @@ class Data_Label(object):
         negative_samples = []
         with open('./data/negative_samples/code_change_pro.out', 'r') as cc, \
             open('./data/negative_samples/todo_comments_pro.out', 'r') as todo, \
-            open('./data/negative_samples/commit_msg_pro.out', 'r') as msg:
-            for cc_line, todo_line, msg_line in zip(cc, todo, msg): 
+            open('./data/negative_samples/commit_msg_pro.out', 'r') as msg,\
+            open('./data/negative_samples/commit_info_pro.out', 'r') as info:
+            for cc_line, todo_line, msg_line, info_line in zip(cc, todo, msg, info): 
                 cc_line_clear = cc_line.strip()
                 todo_line_clear = todo_line.strip()
                 msg_line_clear = msg_line.strip()
-                negative_samples.append( (cc_line_clear, todo_line_clear, msg_line_clear) ) 
-
-        # random sampling to the size of positive samples 
-        # negative_samples = random.sample(negative_samples, len(self.positive_samples))
+                info_line_clear = info_line.strip()
+                negative_samples.append( (cc_line_clear, \
+                                          todo_line_clear, \
+                                          msg_line_clear, \
+                                          info_line_clear) ) 
         return negative_samples
 
     def label(self):
         '''
         '''
         with open('./data/cc_todo_pairs', 'w') as fout:   
-            for code_change, todo_comment, commit_msg in self.positive_samples: 
-                fout.write( str(code_change) + '\t'  + str(todo_comment)  + '\t' + \
-                            str(commit_msg) + '\t' + str(+1) ) 
+            for code_change, todo_comment, commit_msg, commit_info in self.positive_samples: 
+                fout.write( str(code_change) + '\t'  + \
+                            str(todo_comment)  + '\t' + \
+                            str(commit_msg) + '\t' + \
+                            str(+1) + '\t' + \
+                            str(commit_info) ) 
                 fout.write( '\n' )
 
-            for code_change, todo_comment, commit_msg in self.negative_samples: 
-                fout.write( str(code_change) + '\t' + str(todo_comment) + '\t' + \
-                            str(commit_msg) + '\t' + str(0) )
+            for code_change, todo_comment, commit_msg, commit_info in self.negative_samples: 
+                fout.write( str(code_change) + '\t' + \
+                            str(todo_comment) + '\t' + \
+                            str(commit_msg) + '\t' + \
+                            str(0) + '\t' + \
+                            str(commit_info) )
                 fout.write( '\n' )
         pass
     

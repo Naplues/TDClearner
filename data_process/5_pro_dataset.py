@@ -6,7 +6,7 @@ def output_pro_file(src_path, index):
         for line in src_file:
             src_lst.append(line.strip())
 
-    tgt_path = src_path.rstrip(".out") + '_pro.out'
+    tgt_path = '.' + src_path.split('.')[1] + '_pro.out'
     with open(tgt_path, 'w') as tgt_file: 
         for i, e in enumerate(src_lst):
             if i in index: 
@@ -22,11 +22,12 @@ with open('./positive_samples/todo_comments.out', 'r') as td:
         todo_comment_lst.append(line.strip()) 
 
 for i, e in enumerate(todo_comment_lst):
-    if e not in todo_comment_reserved: 
-        todo_comment_reserved[e] = 1 
-        todo_comment_reserved_index[i] = 1  
-    else:
-        continue
+    todo_comment_reserved_index[i] = 1  
+    # if e not in todo_comment_reserved: 
+    #     todo_comment_reserved[e] = 1 
+    #     todo_comment_reserved_index[i] = 1  
+    # else:
+    #     continue
 
 print("positive_samples:\n")
 print(type(todo_comment_reserved), len(todo_comment_reserved))

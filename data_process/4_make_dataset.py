@@ -4,63 +4,62 @@ class Dataset(object):
         
     def __init__(self):
          
-        self.del_todo_dict = self.load_dict('./del_todo_dict.pkl')
-        print("del_todo_dict:", type(self.del_todo_dict), len(self.del_todo_dict))
+        self.del_todo_lst = self.load_lst('./del_todo.pkl')
+        print("del_todo_lst:", type(self.del_todo_lst), len(self.del_todo_lst))
         
-        self.undel_todo_dict = self.load_dict('./undel_todo_dict.pkl')
-        print("undel_todo_dict:", type(self.undel_todo_dict), len(self.undel_todo_dict))
+        self.undel_todo_lst = self.load_lst('./undel_todo.pkl')
+        print("undel_todo_lst:", type(self.undel_todo_lst), len(self.undel_todo_lst))
         
         # pair del_todo-code_change as positive samples 
-        self.pos_cc_todo_pairs = self.get_cc_todo_pairs(self.del_todo_dict)
+        self.pos_cc_todo_pairs = self.get_cc_todo_pairs(self.del_todo_lst)
         print("positive samples:", type(self.pos_cc_todo_pairs), len(self.pos_cc_todo_pairs))
 
         # pair undel_todo-code_change as negative samples
-        self.neg_cc_todo_pairs = self.get_cc_todo_pairs(self.undel_todo_dict) 
+        self.neg_cc_todo_pairs = self.get_cc_todo_pairs(self.undel_todo_lst) 
         print("negative sampels:", type(self.neg_cc_todo_pairs), len(self.neg_cc_todo_pairs))
         pass
     
-    def load_dict(self, fpath): 
+    def load_lst(self, fpath): 
         '''
-        todo_deleted_dict
-        key: current_commit
-        {
-            'repo_file':
-            'current_commit':
-            'parent_commit':
-            'commit_msg':
-            'diff':
-            'code_changes':
-            'all_comments':
-        }
+        (
+         repo_file, 
+         current_commit, 
+         parent_commit,
+         commit_msg,
+         code_changes, 
+         todo_comments
+        )
         '''
         with open(fpath, 'rb') as handler:
-            todo_deleted_dict = pickle.load(handler)
-        return todo_deleted_dict
+            todo_lst = pickle.load(handler)
+        return todo_lst
     
-    def get_cc_todo_pairs(self, load_dict):
+    def get_cc_todo_pairs(self, load_lst):
         '''
         code_change, todo pair
         '''
         cc_todo_pairs = [] 
         
-        for k, v in load_dict.items():
-            repo_file = v['repo_file']
-            current_commit = v['current_commit']
-            parent_commit = v['parent_commit']
-            commit_msg = v['commit_msg'] 
+        # for k, v in load_dict.items():
+        for e in load_lst:
+            repo_file = e[0] 
+            current_commit = e[1] 
+            parent_commit = e[2] 
+            commit_msg = e[3] 
+            code_change = e[4] 
+            todo_comments = e[5] 
 
-            code_change = v['code_changes']
-            todo_comments = v['todo_comments']
             # list to string
             code_change = "<nl>".join(code_change)
             # print("code_change:", code_change)
             # list to string  
             todo_comments = " ".join(todo_comments)
             # print("todo_comments:", todo_comments)
+            todo_comments = todo_comments.strip().lstrip('-')
 
-            if len(code_change.split()) < 5:  
+            if len(set(code_change.split())) < 5:  
                 continue 
-            if len(todo_comments.split()) < 5:
+            if len(set(todo_comments.split())) < 5:
                 continue
             # make sure it is a Python comment  
             if '#' in todo_comments or \
@@ -72,7 +71,7 @@ class Dataset(object):
             # print(code_change)
         
         return cc_todo_pairs
-        pass 
+        # pass 
     
     def output(self):
         '''

@@ -120,7 +120,6 @@ class structure_data(object):
             pickle.dump(self.undel_todo_lst, handler)
 
 def main():  
-
     sd = structure_data()   
     sd.save()
     pass
